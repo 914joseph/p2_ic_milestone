@@ -1,10 +1,7 @@
 package br.ufal.ic.p2.jackut;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 public class Users implements Serializable {
     private String login;
@@ -12,6 +9,7 @@ public class Users implements Serializable {
     private String name;
     private List<String> friends;
     private Queue<String> messages;
+    private Map<String, String> attributes; // Novo mapa para atributos personalizados
 
     public Users(String login, String password, String name) {
         this.login = login;
@@ -19,6 +17,7 @@ public class Users implements Serializable {
         this.name = name;
         this.friends = new ArrayList<>();
         this.messages = new LinkedList<>();
+        this.attributes = new HashMap<>(); // Inicializa o mapa de atributos
     }
 
     public void addFriend(String friend) {
@@ -60,5 +59,16 @@ public class Users implements Serializable {
 
     public List<String> getFriends() {
         return friends;
+    }
+
+    public String getAttribute(String attribute) {
+        if (!attributes.containsKey(attribute)) {
+            throw new RuntimeException("Atributo não preenchido.");
+        }
+        return attributes.get(attribute);
+    }
+
+    public void setAttribute(String attribute, String value) {
+        attributes.put(attribute, value);
     }
 }

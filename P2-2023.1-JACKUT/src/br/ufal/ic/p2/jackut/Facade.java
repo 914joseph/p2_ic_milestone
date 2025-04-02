@@ -71,7 +71,7 @@ public class Facade {
         if (attribute.equalsIgnoreCase("name")) {
             return user.getName();
         }
-        throw new RuntimeException("Atributo não encontrado.");
+        return user.getAttribute(attribute);
     }
 
     public void editProfile(String sessionId, String attribute, String value) {
@@ -82,12 +82,10 @@ public class Facade {
         String login = sessions.get(sessionId);
         Users user = users.get(login);
 
-        switch (attribute.toLowerCase()) {
-            case "name":
-                user.setName(value);
-                break;
-            default:
-                throw new RuntimeException("Atributo não encontrado.");
+        if (attribute.equalsIgnoreCase("name")) {
+            user.setName(value);
+        } else {
+            user.setAttribute(attribute, value);
         }
         saveData();
     }
