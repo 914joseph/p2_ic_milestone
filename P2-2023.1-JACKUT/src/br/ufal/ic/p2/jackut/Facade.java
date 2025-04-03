@@ -150,6 +150,37 @@ public class Facade {
         saveData();
     }
 
+    public void sendMessage(String sessionId, String recipientLogin, String message) {
+        if (!sessions.containsKey(sessionId)) {
+            throw new RuntimeException("Usuário não cadastrado.");
+        }
+
+        String senderLogin = sessions.get(sessionId);
+
+        if (senderLogin.equals(recipientLogin)) {
+            throw new RuntimeException("Usuário não pode enviar recado para si mesmo.");
+        }
+
+        if (!users.containsKey(recipientLogin)) {
+            throw new RuntimeException("Usuário não cadastrado.");
+        }
+
+        Users recipient = users.get(recipientLogin);
+        recipient.addMessage(message);
+        saveData();
+    }
+
+    public String readMessage(String sessionId) {
+        if (!sessions.containsKey(sessionId)) {
+            throw new RuntimeException("Usuário não cadastrado.");
+        }
+
+        String login = sessions.get(sessionId);
+        Users user = users.get(login);
+
+        return user.readMessage();
+    }
+
     public void closeSystem() {
         saveData();
     }

@@ -1,4 +1,4 @@
-# User Story 4 - Envio e leitura de recados entre usuários - Teste de persistência
+# User Story 4 - Envio e leitura de recados entre usuï¿½rios - Teste de persistï¿½ncia
 
 id1=abrirSessao login=jpsauve senha=sauvejp
 id2=abrirSessao login=oabath senha=abatho
@@ -11,9 +11,8 @@ expect "Recado de John para Osorio" lerRecado id=${id2}
 expect "Recado de Osorio para John" lerRecado id=${id3}
 expect "Recado de Jacques para John" lerRecado id=${id3}
 
-expectError "Não há recados." lerRecado id=${id1}
-expectError "Não há recados." lerRecado id=${id2}
-expectError "Não há recados." lerRecado id=${id3}
+expectError "Nï¿½o hï¿½ recados." lerRecado id=${id1}
+expectError "Nï¿½o hï¿½ recados." lerRecado id=${id2}
+expectError "Nï¿½o hï¿½ recados." lerRecado id=${id3}
 
 encerrarSistema
-quit

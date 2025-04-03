@@ -8,9 +8,9 @@ public class Users implements Serializable {
     private String password;
     private String name;
     private List<String> friends;
-    private Queue<String> messages;
-    private Map<String, String> attributes; // Mapa para atributos personalizados
-    private List<String> pendingFriendRequests; // Lista de convites pendentes
+    private Queue<String> messages; // Fila para armazenar recados
+    private Map<String, String> attributes;
+    private List<String> pendingFriendRequests;
 
     public Users(String login, String password, String name) {
         this.login = login;
@@ -89,7 +89,7 @@ public class Users implements Serializable {
 
     public String readMessage() {
         if (messages.isEmpty()) {
-            return null;
+            throw new RuntimeException("Não há recados.");
         }
         return messages.poll();
     }
