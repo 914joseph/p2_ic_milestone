@@ -9,7 +9,8 @@ public class Users implements Serializable {
     private String name;
     private List<String> friends;
     private Queue<String> messages;
-    private Map<String, String> attributes; // Novo mapa para atributos personalizados
+    private Map<String, String> attributes; // Mapa para atributos personalizados
+    private List<String> pendingFriendRequests; // Lista de convites pendentes
 
     public Users(String login, String password, String name) {
         this.login = login;
@@ -17,7 +18,8 @@ public class Users implements Serializable {
         this.name = name;
         this.friends = new ArrayList<>();
         this.messages = new LinkedList<>();
-        this.attributes = new HashMap<>(); // Inicializa o mapa de atributos
+        this.attributes = new HashMap<>();
+        this.pendingFriendRequests = new ArrayList<>();
     }
 
     public void addFriend(String friend) {
@@ -30,15 +32,28 @@ public class Users implements Serializable {
         return friends.contains(friend);
     }
 
-    public void addMessage(String message) {
-        messages.add(message);
+    public void addFriendRequest(String friend) {
+        if (!pendingFriendRequests.contains(friend)) {
+            pendingFriendRequests.add(friend);
+        }
     }
 
-    public String readMessage() {
-        if (messages.isEmpty()) {
-            return null;
+    public boolean hasPendingRequest(String friend) {
+        return pendingFriendRequests.contains(friend);
+    }
+
+    public void acceptFriendRequest(String friend) {
+        if (pendingFriendRequests.remove(friend)) {
+            addFriend(friend);
         }
-        return messages.poll();
+    }
+
+    public List<String> getFriends() {
+        return friends;
+    }
+
+    public List<String> getPendingFriendRequests() {
+        return pendingFriendRequests;
     }
 
     public String getLogin() {
@@ -57,10 +72,6 @@ public class Users implements Serializable {
         this.name = name;
     }
 
-    public List<String> getFriends() {
-        return friends;
-    }
-
     public String getAttribute(String attribute) {
         if (!attributes.containsKey(attribute)) {
             throw new RuntimeException("Atributo não preenchido.");
@@ -70,5 +81,16 @@ public class Users implements Serializable {
 
     public void setAttribute(String attribute, String value) {
         attributes.put(attribute, value);
+    }
+
+    public void addMessage(String message) {
+        messages.add(message);
+    }
+
+    public String readMessage() {
+        if (messages.isEmpty()) {
+            return null;
+        }
+        return messages.poll();
     }
 }

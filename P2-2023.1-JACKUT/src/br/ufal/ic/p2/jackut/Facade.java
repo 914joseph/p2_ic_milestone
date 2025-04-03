@@ -62,16 +62,76 @@ public class Facade {
         return sessionId;
     }
 
+    public void addFriend(String sessionId, String friendLogin) {
+        if (!users.containsKey(friendLogin)) {
+            throw new RuntimeException("Usuário não cadastrado.");
+        }
+        if (!sessions.containsKey(sessionId)) {
+            throw new RuntimeException("Usuário não cadastrado.");
+        }
+
+        String login = sessions.get(sessionId);
+        Users user = users.get(login);
+
+        if (login.equals(friendLogin)) {
+            throw new RuntimeException("Usuário não pode adicionar a si mesmo como amigo.");
+        }
+
+        Users friend = users.get(friendLogin);
+
+        if (user.isFriend(friendLogin)) {
+            throw new RuntimeException("Usuário já está adicionado como amigo.");
+        }
+
+        if (user.hasPendingRequest(friendLogin)) {
+            throw new RuntimeException("Usuário já está adicionado como amigo, esperando aceitação do convite.");
+        }
+
+        if (friend.hasPendingRequest(login)) {
+            friend.acceptFriendRequest(login);
+            user.addFriend(friendLogin);
+        } else {
+            friend.addFriendRequest(login);
+        }
+
+        saveData();
+    }
+
+    public boolean isFriend(String login, String friendLogin) {
+        if (!users.containsKey(login)) {
+            throw new RuntimeException("Usuário não cadastrado.");
+        }
+
+        Users user = users.get(login);
+        return user.isFriend(friendLogin);
+    }
+
+    public String getFriends(String login) {
+        if (!users.containsKey(login)) {
+            throw new RuntimeException("Usuário não cadastrado.");
+        }
+
+        Users user = users.get(login);
+        return String.join(",", user.getFriends());
+    }
+
     public String getUserAttribute(String login, String attribute) {
         if (!users.containsKey(login)) {
             throw new RuntimeException("Usuário não cadastrado.");
         }
 
         Users user = users.get(login);
+
+        // Verifica se o atributo solicitado foi preenchido
         if (attribute.equalsIgnoreCase("name")) {
             return user.getName();
         }
-        return user.getAttribute(attribute);
+
+        try {
+            return user.getAttribute(attribute);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Atributo não preenchido.");
+        }
     }
 
     public void editProfile(String sessionId, String attribute, String value) {

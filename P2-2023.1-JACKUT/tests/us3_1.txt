@@ -1,6 +1,6 @@
-# User Story 3 - Adição de amigos
-# Permita a um usuário cadastrado do Jackut adicionar outro usuário como amigo, o que faz o sistema enviar-lhe um convite. O relacionamento só é
-# efetivado quando o outro usuário o adicionar de volta.
+# User Story 3 - Adiï¿½ï¿½o de amigos
+# Permita a um usuï¿½rio cadastrado do Jackut adicionar outro usuï¿½rio como amigo, o que faz o sistema enviar-lhe um convite. O relacionamento sï¿½ ï¿½
+# efetivado quando o outro usuï¿½rio o adicionar de volta.
 
 zerarSistema
 
@@ -13,7 +13,7 @@ expect false ehAmigo login=oabath amigo=jpsauve
 id1=abrirSessao login=jpsauve senha=sauvejp
 adicionarAmigo id=${id1} amigo=oabath
 
-expectError "Usuário já está adicionado como amigo, esperando aceitação do convite." adicionarAmigo id=${id1} amigo=oabath
+expectError "Usuï¿½rio jï¿½ estï¿½ adicionado como amigo, esperando aceitaï¿½ï¿½o do convite." adicionarAmigo id=${id1} amigo=oabath
 
 expect false ehAmigo login=jpsauve amigo=oabath
 expect false ehAmigo login=oabath amigo=jpsauve
@@ -59,15 +59,14 @@ expect {jpsauve,oabath} getAmigos login=jdoe
 expect {oabath,jdoe} getAmigos login=jpsauve
 expect {jpsauve,jdoe} getAmigos login=oabath
 
-# Tratamento de erros de adição de amigos
+# Tratamento de erros de adiï¿½ï¿½o de amigos
 
-expectError "Usuário já está adicionado como amigo." adicionarAmigo id=${id1} amigo=oabath
-expectError "Usuário já está adicionado como amigo." adicionarAmigo id=${id2} amigo=jpsauve
+expectError "Usuï¿½rio jï¿½ estï¿½ adicionado como amigo." adicionarAmigo id=${id1} amigo=oabath
+expectError "Usuï¿½rio jï¿½ estï¿½ adicionado como amigo." adicionarAmigo id=${id2} amigo=jpsauve
 
-expectError "Usuário não cadastrado." adicionarAmigo id=${id1} amigo=qwerty
-expectError "Usuário não cadastrado." adicionarAmigo id=${idx} amigo=jpsauve
+expectError "Usuï¿½rio nï¿½o cadastrado." adicionarAmigo id=${id1} amigo=qwerty
+expectError "Usuï¿½rio nï¿½o cadastrado." adicionarAmigo id=${idx} amigo=jpsauve
 
-expectError "Usuário não pode adicionar a si mesmo como amigo." adicionarAmigo id=${id1} amigo=jpsauve
+expectError "Usuï¿½rio nï¿½o pode adicionar a si mesmo como amigo." adicionarAmigo id=${id1} amigo=jpsauve
 
 encerrarSistema
-quit
