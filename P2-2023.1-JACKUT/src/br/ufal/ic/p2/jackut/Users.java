@@ -7,8 +7,10 @@ import br.ufal.ic.p2.jackut.exceptions.*;
 
 /**
  * Classe que representa um usuário no sistema Jackut.
+ * 
+ * Gerencia informações do perfil, amigos, comunidades, mensagens, ídolos, paqueras e inimigos.
  */
-public class Users implements Serializable {
+public class Users implements Serializable, Observer {
     private String login;
     private String password;
     private String name;
@@ -295,5 +297,10 @@ public class Users implements Serializable {
         if (!enemies.contains(enemy)) {
             enemies.add(enemy);
         }
+    }
+
+    @Override
+    public void update(String message) {
+        addMessage(message);
     }
 }

@@ -9,6 +9,9 @@ import br.ufal.ic.p2.jackut.exceptions.*;
 
 /**
  * Classe Facade que gerencia as operações principais do sistema Jackut.
+ * 
+ * Esta classe centraliza todas as funcionalidades do sistema, como criação de usuários,
+ * gerenciamento de comunidades, envio de mensagens, relacionamentos e remoção de contas.
  */
 public class Facade {
     private static final String DATA_FILE = "users.dat";
@@ -57,7 +60,7 @@ public class Facade {
             throw new InvalidLoginException("Uma conta com este login já existe.");
         }
 
-        Users newUser = new Users(login, password, name);
+        Users newUser = UserFactory.createUser(login, password, name);
         users.put(login, newUser);
         saveData();
     }
@@ -331,8 +334,9 @@ public class Facade {
         }
 
         String owner = getSessionUser(sessionId);
-        Community community = new Community(name, description, owner);
+        Community community = CommunityFactory.createCommunity(name, description, owner);
         communities.put(name, community);
+        saveData();
     }
 
     /**
@@ -356,8 +360,9 @@ public class Facade {
             throw new UserAlreadyInCommunityException();
         }
 
-        community.addMember(userLogin);
         Users user = users.get(userLogin);
+        community.addMember(userLogin);
+        community.addObserver(user);
         user.addCommunity(communityName);
         saveData();
     }
@@ -486,6 +491,15 @@ public class Facade {
         }
     }
 
+    /**
+     * Adiciona um ídolo para o usuário.
+     *
+     * @param sessionId ID da sessão do usuário.
+     * @param idolLogin Login do ídolo.
+     * @throws AutoIdolException           Se o usuário tentar se adicionar como ídolo.
+     * @throws IdolAlreadyExistsException  Se o ídolo já estiver adicionado.
+     * @throws InteractionWithEnemyException Se o ídolo for inimigo do usuário.
+     */
     public void addIdol(String sessionId, String idolLogin) {
         String userLogin = getSessionUser(sessionId);
         Users user = users.get(userLogin);
@@ -507,6 +521,15 @@ public class Facade {
         saveData();
     }
 
+    /**
+     * Adiciona uma paquera para o usuário.
+     *
+     * @param sessionId  ID da sessão do usuário.
+     * @param crushLogin Login da paquera.
+     * @throws AutoCrushException          Se o usuário tentar se adicionar como paquera.
+     * @throws CrushAlreadyExistsException Se a paquera já estiver adicionada.
+     * @throws InteractionWithEnemyException Se a paquera for inimiga do usuário.
+     */
     public void addCrush(String sessionId, String crushLogin) {
         String userLogin = getSessionUser(sessionId);
         Users user = users.get(userLogin);
@@ -534,6 +557,14 @@ public class Facade {
         saveData();
     }
 
+    /**
+     * Adiciona um inimigo para o usuário.
+     *
+     * @param sessionId  ID da sessão do usuário.
+     * @param enemyLogin Login do inimigo.
+     * @throws AutoEnemyException          Se o usuário tentar se adicionar como inimigo.
+     * @throws EnemyAlreadyExistsException Se o inimigo já estiver adicionado.
+     */
     public void addEnemy(String sessionId, String enemyLogin) {
         String userLogin = getSessionUser(sessionId);
         Users user = users.get(userLogin);
@@ -551,6 +582,12 @@ public class Facade {
         saveData();
     }
 
+    /**
+     * Remove um usuário do sistema.
+     *
+     * @param sessionId ID da sessão do usuário.
+     * @throws UserNotFoundException Se o usuário não for encontrado.
+     */
     public void removeUser(String sessionId) {
         if (!sessions.containsKey(sessionId)) {
             throw new UserNotFoundException("Usuário não cadastrado.");

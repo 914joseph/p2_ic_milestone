@@ -7,6 +7,8 @@ import java.util.*;
 
 /**
  * Classe que representa uma comunidade no sistema Jackut.
+ * 
+ * Gerencia informações sobre membros, mensagens e o dono da comunidade.
  */
 public class Community implements Serializable {
     private String name;
@@ -14,6 +16,7 @@ public class Community implements Serializable {
     private String owner;
     private List<String> members;
     private Map<String, Queue<String>> messages;
+    private List<Observer> observers;
 
     public Community(String name, String description, String owner) {
         this.name = name;
@@ -23,6 +26,7 @@ public class Community implements Serializable {
         this.members.add(owner);
         this.messages = new HashMap<>();
         this.messages.put(owner, new LinkedList<>());
+        this.observers = new ArrayList<>();
     }
 
     public String getName() {
@@ -48,9 +52,25 @@ public class Community implements Serializable {
         }
     }
 
+    public void addObserver(Observer observer) {
+        observers.add(observer);
+    }
+
+    public void removeObserver(Observer observer) {
+        observers.remove(observer);
+    }
+
+    public void notifyObservers(String message) {
+        for (Observer observer : observers) {
+            observer.update(message);
+        }
+    }
+
     public void addMessage(String sender, String content) {
+        String message = "Mensagem de " + sender + ": " + content;
+        notifyObservers(message);
         for (String member : members) {
-            messages.get(member).add("Mensagem de " + sender + ": " + content);
+            messages.get(member).add(message);
         }
     }
 
@@ -62,6 +82,11 @@ public class Community implements Serializable {
         return memberMessages.poll();
     }
 
+    /**
+     * Remove um membro da comunidade.
+     *
+     * @param memberLogin Login do membro a ser removido.
+     */
     public void removeMember(String memberLogin) {
         if (members.contains(memberLogin)) {
             members.remove(memberLogin);
