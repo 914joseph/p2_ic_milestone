@@ -537,7 +537,7 @@ public class Facade {
     public void addEnemy(String sessionId, String enemyLogin) {
         String userLogin = getSessionUser(sessionId);
         Users user = users.get(userLogin);
-        Users enemy = users.get(enemyLogin);
+        
 
         if (userLogin.equals(enemyLogin)) {
             throw new AutoEnemyException();
@@ -548,6 +548,35 @@ public class Facade {
         }
 
         user.addEnemy(enemyLogin);
+        saveData();
+    }
+
+    public void removeUser(String sessionId) {
+        if (!sessions.containsKey(sessionId)) {
+            throw new UserNotFoundException("Usuário não cadastrado.");
+        }
+
+        String userLogin = sessions.get(sessionId);
+        Users user = users.get(userLogin);
+
+        // Remover o usuário de todas as comunidades
+        for (Community community : communities.values()) {
+            if (community.getOwner().equals(userLogin)) {
+                communities.remove(community.getName());
+            } else {
+                community.removeMember(userLogin);
+            }
+        }
+
+        // Remover mensagens enviadas pelo usuário
+        for (Users otherUser : users.values()) {
+            otherUser.removeMessagesFrom(userLogin);
+        }
+
+        // Remover o usuário do sistema
+        users.remove(userLogin);
+        sessions.remove(sessionId);
+
         saveData();
     }
 }

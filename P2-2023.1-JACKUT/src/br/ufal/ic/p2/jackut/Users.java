@@ -208,12 +208,30 @@ public class Users implements Serializable {
     }
 
     /**
+     * Remove uma comunidade da lista de comunidades do usuário.
+     *
+     * @param communityName Nome da comunidade a ser removida.
+     */
+    public void removeCommunity(String communityName) {
+        communities.remove(communityName);
+    }
+
+    /**
      * Retorna a lista de comunidades do usuário.
      *
      * @return Lista de comunidades.
      */
     public List<String> getCommunities() {
         return Collections.unmodifiableList(communities);
+    }
+
+    /**
+     * Remove mensagens enviadas por um usuário específico.
+     *
+     * @param senderLogin Login do remetente das mensagens a serem removidas.
+     */
+    public void removeMessagesFrom(String senderLogin) {
+        messages.removeIf(message -> message.startsWith("Mensagem de " + senderLogin + ":"));
     }
 
     /**

@@ -61,4 +61,11 @@ public class Community implements Serializable {
         }
         return memberMessages.poll();
     }
+
+    public void removeMember(String memberLogin) {
+        if (members.contains(memberLogin)) {
+            members.remove(memberLogin);
+            messages.remove(memberLogin);
+        }
+    }
 }
