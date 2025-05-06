@@ -17,6 +17,9 @@ public class Users implements Serializable {
     private Map<String, String> attributes;
     private List<String> pendingFriendRequests;
     private List<String> communities;
+    private List<String> idols;
+    private List<String> crushes;
+    private List<String> enemies;
 
     /**
      * Construtor da classe Users.
@@ -34,6 +37,9 @@ public class Users implements Serializable {
         this.attributes = new HashMap<>();
         this.pendingFriendRequests = new ArrayList<>();
         this.communities = new ArrayList<>();
+        this.idols = new ArrayList<>();
+        this.crushes = new ArrayList<>();
+        this.enemies = new ArrayList<>();
     }
 
     /**
@@ -208,5 +214,68 @@ public class Users implements Serializable {
      */
     public List<String> getCommunities() {
         return Collections.unmodifiableList(communities);
+    }
+
+    /**
+     * Verifica se o usuário é fã de outro usuário.
+     *
+     * @param idol Login do ídolo a ser verificado.
+     * @return {@code true} se for fã, {@code false} caso contrário.
+     */
+    public boolean isIdol(String idol) {
+        return idols.contains(idol);
+    }
+
+    /**
+     * Adiciona um ídolo à lista de ídolos do usuário.
+     *
+     * @param idol Login do ídolo a ser adicionado.
+     */
+    public void addIdol(String idol) {
+        if (!idols.contains(idol)) {
+            idols.add(idol);
+        }
+    }
+
+    /**
+     * Verifica se o usuário tem uma paixão por outro usuário.
+     *
+     * @param crush Login da paixão a ser verificada.
+     * @return {@code true} se for paixão, {@code false} caso contrário.
+     */
+    public boolean isCrush(String crush) {
+        return crushes.contains(crush);
+    }
+
+    /**
+     * Adiciona uma paixão à lista de paixões do usuário.
+     *
+     * @param crush Login da paixão a ser adicionada.
+     */
+    public void addCrush(String crush) {
+        if (!crushes.contains(crush)) {
+            crushes.add(crush);
+        }
+    }
+
+    /**
+     * Verifica se o usuário é inimigo de outro usuário.
+     *
+     * @param enemy Login do inimigo a ser verificado.
+     * @return {@code true} se for inimigo, {@code false} caso contrário.
+     */
+    public boolean isEnemy(String enemy) {
+        return enemies.contains(enemy);
+    }
+
+    /**
+     * Adiciona um inimigo à lista de inimigos do usuário.
+     *
+     * @param enemy Login do inimigo a ser adicionado.
+     */
+    public void addEnemy(String enemy) {
+        if (!enemies.contains(enemy)) {
+            enemies.add(enemy);
+        }
     }
 }

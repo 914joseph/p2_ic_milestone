@@ -1,0 +1,171 @@
+# User Story 8 - Cria��o de novos relacionamentos - Permita a um usu�rio cadastrado do Jackut estabelecer outros tipos de relacionamentos dentro da rede, al�m de amizade.
+
+zerarSistema
+
+criarUsuario login=jpsauve senha=sauvejp nome="Jacques Sauve"
+s1=abrirSessao login=jpsauve senha=sauvejp
+
+##################
+# Testes da rela��o f�-�dolo
+# Regras: um usu�rio pode adicionar outro como �dolo e passa a ser chamado seu f�; essa rela��o � independente do fato de os usu�rios serem amigos;
+# a informa��o de que usu�rio � f� de quem � p�blica
+##################
+
+criarUsuario login=fadejacques senha=seuqcajedaf nome="F� de Jacques"
+s2=abrirSessao login=fadejacques senha=seuqcajedaf
+
+expect false ehAmigo login=fadejacques amigo=jpsauve
+expect false ehAmigo login=jpsauve amigo=fadejacques
+expect false ehFa login=fadejacques idolo=jpsauve
+expect false ehFa login=jpsauve idolo=fadejacques
+
+adicionarIdolo id=${s2} idolo=jpsauve
+
+expect false ehAmigo login=fadejacques amigo=jpsauve
+expect false ehAmigo login=jpsauve amigo=fadejacques
+expect true ehFa login=fadejacques idolo=jpsauve
+expect false ehFa login=jpsauve idolo=fadejacques
+
+expect {} getFas login=fadejacques
+expect {fadejacques} getFas login=jpsauve
+
+# um usu�rio pode ter mais de um f�
+criarUsuario login=fa2dejacques senha=seuqcajedaf nome="F� 2 de Jacques"
+s3=abrirSessao login=fa2dejacques senha=seuqcajedaf
+
+adicionarIdolo id=${s3} idolo=jpsauve
+
+expect true ehFa login=fa2dejacques idolo=jpsauve
+expect false ehFa login=jpsauve idolo=fa2dejacques
+
+expect {fadejacques,fa2dejacques} getFas login=jpsauve
+
+# um usu�rio pode ter mais de um �dolo
+adicionarIdolo id=${s3} idolo=fadejacques
+
+expect true ehFa login=fa2dejacques idolo=jpsauve
+expect true ehFa login=fa2dejacques idolo=fadejacques
+
+expect {} getFas login=fa2dejacques
+expect {fadejacques,fa2dejacques} getFas login=jpsauve
+expect {fa2dejacques} getFas login=fadejacques
+
+# tratamento de erros
+
+expectError "Usu�rio j� est� adicionado como �dolo." adicionarIdolo id=${s3} idolo=jpsauve
+expectError "Usu�rio n�o cadastrado." adicionarIdolo id=${s3} idolo=qwerty
+expectError "Usu�rio n�o pode ser f� de si mesmo." adicionarIdolo id=${s3} idolo=fa2dejacques
+
+##################
+# Testes da rela��o de paquera
+# Regras: um usu�rio pode adicionar outro como paquera, e esta informa��o � privada para quem adicionou; n�o precisam ser amigos; entretanto, se ambos se adicionarem como paquera mutuamente, um recado autom�tico do
+# sistema � enviado para ambos
+##################
+
+criarUsuario login=paqueradejacques senha=abcdef nome="Paquera de Jacques"
+s2=abrirSessao login=paqueradejacques senha=abcdef
+
+expect false ehAmigo login=paqueradejacques amigo=jpsauve
+expect false ehAmigo login=jpsauve amigo=paqueradejacques
+expect false ehPaquera id=${s2} paquera=jpsauve
+expect false ehPaquera id=${s1} paquera=paqueradejacques
+
+adicionarPaquera id=${s2} paquera=jpsauve
+
+expect false ehAmigo login=paqueradejacques amigo=jpsauve
+expect false ehAmigo login=jpsauve amigo=paqueradejacques
+expect true ehPaquera id=${s2} paquera=jpsauve
+expect false ehPaquera id=${s1} paquera=paqueradejacques
+expect {jpsauve} getPaqueras id=${s2}
+expect {} getPaqueras id=${s1}
+
+# agora jpsauve adiciona paqueradejacques como paquera
+
+expectError "N�o h� recados." lerRecado id=${s1}
+expectError "N�o h� recados." lerRecado id=${s2}
+
+adicionarPaquera id=${s1} paquera=paqueradejacques
+
+expect false ehAmigo login=paqueradejacques amigo=jpsauve
+expect false ehAmigo login=jpsauve amigo=paqueradejacques
+expect true ehPaquera id=${s2} paquera=jpsauve
+expect true ehPaquera id=${s1} paquera=paqueradejacques
+expect {jpsauve} getPaqueras id=${s2}
+expect {paqueradejacques} getPaqueras id=${s1}
+
+# um recado � enviado a ambos pelo sistema
+
+expect "Paquera de Jacques � seu paquera - Recado do Jackut." lerRecado id=${s1}
+expect "Jacques Sauve � seu paquera - Recado do Jackut." lerRecado id=${s2}
+
+# um usu�rio pode ter mais de um paquera
+
+criarUsuario login=paquera2dejacques senha=abcdef nome="Paquera 2 de Jacques"
+s3=abrirSessao login=paquera2dejacques senha=abcdef
+
+adicionarPaquera id=${s3} paquera=jpsauve
+adicionarPaquera id=${s3} paquera=paqueradejacques
+
+expect {jpsauve,paqueradejacques} getPaqueras id=${s3}
+expect {jpsauve} getPaqueras id=${s2}
+expect {paqueradejacques} getPaqueras id=${s1}
+
+# tratamento de erros
+
+expectError "Usu�rio j� est� adicionado como paquera." adicionarPaquera id=${s3} paquera=jpsauve
+expectError "Usu�rio n�o cadastrado." adicionarPaquera id=${s3} paquera=qwerty
+expectError "Usu�rio n�o pode ser paquera de si mesmo." adicionarPaquera id=${s3} paquera=paquera2dejacques
+
+################
+# Testes da rela��o de inimizade
+# Regras: um usu�rio pode informar ao Jackut que outro usu�rio � seu inimigo; um inimigo n�o pode lhe adicionar como amigo, paquera ou f�, e todas as mensagens que chegam dele s�o automaticamente descartadas
+################
+
+criarUsuario login=inimigodejacques senha=abcdef nome="Inimigo de Jacques"
+s2=abrirSessao login=inimigodejacques senha=abcdef
+
+adicionarInimigo id=${s2} inimigo=jpsauve
+
+expect false ehAmigo login=jpsauve amigo=inimigodejacques
+expect false ehFa login=jpsauve idolo=inimigodejacques
+expect false ehPaquera id=${s1} paquera=inimigodejacques
+
+expectError "Fun��o inv�lida: Inimigo de Jacques � seu inimigo." adicionarAmigo id=${s1} amigo=inimigodejacques
+expectError "Fun��o inv�lida: Inimigo de Jacques � seu inimigo." adicionarIdolo id=${s1} idolo=inimigodejacques
+expectError "Fun��o inv�lida: Inimigo de Jacques � seu inimigo." adicionarPaquera id=${s1} paquera=inimigodejacques
+expectError "Fun��o inv�lida: Inimigo de Jacques � seu inimigo." enviarRecado id=${s1} destinatario=inimigodejacques recado="fhdjfsd"
+
+# usu�rio pode ter mais de um inimigo
+
+criarUsuario login=inimigo2dejacques senha=abcdef nome="Inimigo 2 de Jacques"
+s3=abrirSessao login=inimigo2dejacques senha=abcdef
+
+adicionarInimigo id=${s3} inimigo=jpsauve
+adicionarInimigo id=${s3} inimigo=inimigodejacques
+
+expectError "Fun��o inv�lida: Inimigo 2 de Jacques � seu inimigo." adicionarAmigo id=${s1} amigo=inimigo2dejacques
+expectError "Fun��o inv�lida: Inimigo 2 de Jacques � seu inimigo." adicionarAmigo id=${s2} amigo=inimigo2dejacques
+
+# tratamento de erros
+
+expectError "Usu�rio j� est� adicionado como inimigo." adicionarInimigo id=${s2} inimigo=jpsauve
+expectError "Usu�rio n�o cadastrado." adicionarInimigo id=${s2} inimigo=qwerty
+expectError "Usu�rio n�o pode ser inimigo de si mesmo." adicionarInimigo id=${s2} inimigo=inimigodejacques
+
+# teste de persist�ncia
+
+criarUsuario login=jacquespersistente senha=abcdef nome="Jacques Persistente"
+
+criarUsuario login=fapersistentedejacques senha=seuqcajedaf nome="F� Persistente de Jacques"
+s2=abrirSessao login=fapersistentedejacques senha=seuqcajedaf
+adicionarIdolo id=${s2} idolo=jacquespersistente
+
+criarUsuario login=paquerapersistentedejacques senha=abcdef nome="Paquera Persistente de Jacques"
+s3=abrirSessao login=paquerapersistentedejacques senha=abcdef
+adicionarPaquera id=${s3} paquera=jacquespersistente
+
+criarUsuario login=inimigopersistentedejacques senha=abcdef nome="Inimigo Persistente de Jacques"
+s4=abrirSessao login=inimigopersistentedejacques senha=abcdef
+adicionarInimigo id=${s4} inimigo=jacquespersistente
+
+encerrarSistema

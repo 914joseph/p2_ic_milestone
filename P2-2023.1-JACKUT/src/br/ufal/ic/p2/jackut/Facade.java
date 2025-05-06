@@ -485,4 +485,69 @@ public class Facade {
             communities = new HashMap<>();
         }
     }
+
+    public void addIdol(String sessionId, String idolLogin) {
+        String userLogin = getSessionUser(sessionId);
+        Users user = users.get(userLogin);
+        Users idol = users.get(idolLogin);
+
+        if (userLogin.equals(idolLogin)) {
+            throw new AutoIdolException();
+        }
+
+        if (user.isEnemy(idolLogin) || idol.isEnemy(userLogin)) {
+            throw new InteractionWithEnemyException(idol.getName());
+        }
+
+        if (user.isIdol(idolLogin)) {
+            throw new IdolAlreadyExistsException();
+        }
+
+        user.addIdol(idolLogin);
+        saveData();
+    }
+
+    public void addCrush(String sessionId, String crushLogin) {
+        String userLogin = getSessionUser(sessionId);
+        Users user = users.get(userLogin);
+        Users crush = users.get(crushLogin);
+
+        if (userLogin.equals(crushLogin)) {
+            throw new AutoCrushException();
+        }
+
+        if (user.isEnemy(crushLogin) || crush.isEnemy(userLogin)) {
+            throw new InteractionWithEnemyException(crush.getName());
+        }
+
+        if (user.isCrush(crushLogin)) {
+            throw new CrushAlreadyExistsException();
+        }
+
+        user.addCrush(crushLogin);
+
+        if (crush.isCrush(userLogin)) {
+            sendMessage("Jackut", crushLogin, user.getName() + " é seu paquera - Recado do Jackut.");
+            sendMessage("Jackut", userLogin, crush.getName() + " é seu paquera - Recado do Jackut.");
+        }
+
+        saveData();
+    }
+
+    public void addEnemy(String sessionId, String enemyLogin) {
+        String userLogin = getSessionUser(sessionId);
+        Users user = users.get(userLogin);
+        Users enemy = users.get(enemyLogin);
+
+        if (userLogin.equals(enemyLogin)) {
+            throw new AutoEnemyException();
+        }
+
+        if (user.isEnemy(enemyLogin)) {
+            throw new EnemyAlreadyExistsException();
+        }
+
+        user.addEnemy(enemyLogin);
+        saveData();
+    }
 }
