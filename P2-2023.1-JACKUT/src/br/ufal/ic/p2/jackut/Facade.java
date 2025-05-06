@@ -13,25 +13,28 @@ public class Facade {
     private static final String DATA_FILE = "users.dat";
     private Map<String, Users> users;
     private Map<String, String> sessions;
+    private Map<String, Community> communities;
     private int sessionCounter;
 
     /**
      * Construtor da classe Facade.
-     * Inicializa os mapas de usuários e sessões e carrega os dados persistidos.
+     * Inicializa os mapas de usuários, comunidades e sessões e carrega os dados persistidos.
      */
     public Facade() {
         users = new HashMap<>();
         sessions = new HashMap<>();
+        communities = new HashMap<>();
         sessionCounter = 0;
         loadData();
     }
 
     /**
-     * Reseta o sistema, limpando todos os dados de usuários e sessões.
+     * Reseta o sistema, limpando todos os dados de usuários, comunidades e sessões.
      */
     public void resetSystem() {
         users.clear();
         sessions.clear();
+        communities.clear();
         sessionCounter = 0;
         saveData();
     }
@@ -282,11 +285,98 @@ public class Facade {
     }
 
     /**
+     * Cria uma nova comunidade no sistema.
+     *
+     * @param sessionId   ID da sessão do usuário.
+     * @param name        Nome da comunidade.
+     * @param description Descrição da comunidade.
+     * @throws CommunityAlreadyExistsException Se a comunidade já existir.
+     */
+    public void createCommunity(String sessionId, String name, String description) {
+        if (communities.containsKey(name)) {
+            throw new CommunityAlreadyExistsException();
+        }
+
+        String owner = getSessionUser(sessionId);
+        Community community = new Community(name, description, owner);
+        communities.put(name, community);
+    }
+
+    /**
+     * Obtém a descrição de uma comunidade.
+     *
+     * @param name Nome da comunidade.
+     * @return Descrição da comunidade.
+     * @throws CommunityNotFoundException Se a comunidade não for encontrada.
+     */
+    public String getCommunityDescription(String name) {
+        Community community = getCommunity(name);
+        return community.getDescription();
+    }
+
+    /**
+     * Obtém o dono de uma comunidade.
+     *
+     * @param name Nome da comunidade.
+     * @return Dono da comunidade.
+     * @throws CommunityNotFoundException Se a comunidade não for encontrada.
+     */
+    public String getCommunityOwner(String name) {
+        Community community = getCommunity(name);
+        return community.getOwner();
+    }
+
+    /**
+     * Obtém os membros de uma comunidade.
+     *
+     * @param name Nome da comunidade.
+     * @return Membros da comunidade como uma string separada por vírgulas.
+     * @throws CommunityNotFoundException Se a comunidade não for encontrada.
+     */
+    public String getCommunityMembers(String name) {
+        Community community = getCommunity(name);
+        return "{" + String.join(",", community.getMembers()) + "}";
+    }
+
+    /**
+     * Obtém uma comunidade pelo nome.
+     *
+     * @param name Nome da comunidade.
+     * @return A comunidade correspondente.
+     * @throws CommunityNotFoundException Se a comunidade não for encontrada.
+     */
+    private Community getCommunity(String name) {
+        if (!communities.containsKey(name)) {
+            throw new CommunityNotFoundException();
+        }
+        return communities.get(name);
+    }
+
+    /**
+     * Obtém o usuário associado a uma sessão.
+     *
+     * @param sessionId ID da sessão.
+     * @return Login do usuário.
+     */
+    private String getSessionUser(String sessionId) {
+        if (!sessions.containsKey(sessionId)) {
+            throw new UserNotFoundException("Sessão inválida.");
+        }
+        return sessions.get(sessionId);
+    }
+
+    /**
      * Salva os dados do sistema em um arquivo.
      */
     private void saveData() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(DATA_FILE))) {
             oos.writeObject(users);
+        } catch (IOException e) {
+            System.err.println("Erro ao salvar os dados: " + e.getMessage());
+        }
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("data.dat"))) {
+            oos.writeObject(communities);
         } catch (IOException e) {
             System.err.println("Erro ao salvar os dados: " + e.getMessage());
         }
@@ -306,6 +396,12 @@ public class Facade {
             users = (Map<String, Users>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("Erro ao carregar os dados: " + e.getMessage());
+        }
+
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("data.dat"))) {
+            communities = (Map<String, Community>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            communities = new HashMap<>();
         }
     }
 }
