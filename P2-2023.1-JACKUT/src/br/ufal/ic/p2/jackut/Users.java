@@ -16,6 +16,7 @@ public class Users implements Serializable {
     private Queue<String> messages;
     private Map<String, String> attributes;
     private List<String> pendingFriendRequests;
+    private List<String> communities;
 
     /**
      * Construtor da classe Users.
@@ -32,6 +33,7 @@ public class Users implements Serializable {
         this.messages = new LinkedList<>();
         this.attributes = new HashMap<>();
         this.pendingFriendRequests = new ArrayList<>();
+        this.communities = new ArrayList<>();
     }
 
     /**
@@ -186,5 +188,25 @@ public class Users implements Serializable {
             throw new MessageException("Não há recados.");
         }
         return messages.poll();
+    }
+
+    /**
+     * Adiciona uma comunidade à lista de comunidades do usuário.
+     *
+     * @param communityName Nome da comunidade a ser adicionada.
+     */
+    public void addCommunity(String communityName) {
+        if (!communities.contains(communityName)) {
+            communities.add(communityName);
+        }
+    }
+
+    /**
+     * Retorna a lista de comunidades do usuário.
+     *
+     * @return Lista de comunidades.
+     */
+    public List<String> getCommunities() {
+        return Collections.unmodifiableList(communities);
     }
 }

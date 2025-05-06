@@ -2,6 +2,7 @@ package br.ufal.ic.p2.jackut;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import br.ufal.ic.p2.jackut.exceptions.*;
@@ -300,6 +301,54 @@ public class Facade {
         String owner = getSessionUser(sessionId);
         Community community = new Community(name, description, owner);
         communities.put(name, community);
+    }
+
+    /**
+     * Adiciona um usuário a uma comunidade.
+     *
+     * @param sessionId     ID da sessão do usuário.
+     * @param communityName Nome da comunidade.
+     * @throws UserNotFoundException          Se o usuário não for encontrado.
+     * @throws CommunityNotFoundException     Se a comunidade não for encontrada.
+     * @throws UserAlreadyInCommunityException Se o usuário já estiver na comunidade.
+     */
+    public void addUserToCommunity(String sessionId, String communityName) {
+        if (!sessions.containsKey(sessionId)) {
+            throw new UserNotFoundException("Usuário não cadastrado.");
+        }
+
+        String userLogin = sessions.get(sessionId);
+        Community community = getCommunity(communityName);
+
+        if (community.getMembers().contains(userLogin)) {
+            throw new UserAlreadyInCommunityException();
+        }
+
+        community.addMember(userLogin);
+        Users user = users.get(userLogin);
+        user.addCommunity(communityName);
+        saveData();
+    }
+
+    /**
+     * Obtém as comunidades de um usuário.
+     *
+     * @param login Login do usuário.
+     * @return Comunidades do usuário como uma string separada por vírgulas.
+     * @throws UserNotFoundException Se o usuário não for encontrado.
+     */
+    public String getUserCommunities(String login) {
+        if (!users.containsKey(login)) {
+            throw new UserNotFoundException("Usuário não cadastrado.");
+        }
+
+        Users user = users.get(login);
+        List<String> userCommunities = user.getCommunities();
+
+        if (userCommunities.isEmpty()) {
+            return "{}";
+        }
+        return "{" + String.join(",", userCommunities) + "}";
     }
 
     /**
