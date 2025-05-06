@@ -267,22 +267,54 @@ public class Facade {
     }
 
     /**
+     * Envia uma mensagem para uma comunidade.
+     *
+     * @param sessionId     ID da sessão do usuário.
+     * @param communityName Nome da comunidade.
+     * @param message       Conteúdo da mensagem.
+     * @throws UserNotFoundException          Se o usuário não for encontrado.
+     * @throws UserNotInCommunityException    Se o usuário não for membro da comunidade.
+     */
+    public void sendMessageToCommunity(String sessionId, String communityName, String message) {
+        if (!sessions.containsKey(sessionId)) {
+            throw new UserNotFoundException("Usuário não cadastrado.");
+        }
+
+        String sender = sessions.get(sessionId);
+        Community community = getCommunity(communityName);
+
+        if (!community.getMembers().contains(sender)) {
+            throw new UserNotInCommunityException();
+        }
+
+        community.addMessage(sender, message);
+        saveData();
+    }
+
+    /**
      * Lê a próxima mensagem do usuário.
      *
      * @param sessionId ID da sessão do usuário.
      * @return Conteúdo da mensagem.
      * @throws UserNotFoundException Se a sessão não for encontrada.
-     * @throws MessageException      Se não houver mensagens para ler.
+     * @throws NoMessagesException   Se não houver mensagens para o usuário.
      */
     public String readMessage(String sessionId) {
         if (!sessions.containsKey(sessionId)) {
             throw new UserNotFoundException("Usuário não cadastrado.");
         }
 
-        String login = sessions.get(sessionId);
-        Users user = users.get(login);
-
-        return user.readMessage();
+        String user = sessions.get(sessionId);
+        for (Community community : communities.values()) {
+            if (community.getMembers().contains(user)) {
+                try {
+                    return community.readMessage(user);
+                } catch (NoMessagesException ignored) {
+                    // Continue procurando em outras comunidades
+                }
+            }
+        }
+        throw new NoMessagesException();
     }
 
     /**
@@ -424,7 +456,7 @@ public class Facade {
             System.err.println("Erro ao salvar os dados: " + e.getMessage());
         }
 
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("data.dat"))) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("communities.dat"))) {
             oos.writeObject(communities);
         } catch (IOException e) {
             System.err.println("Erro ao salvar os dados: " + e.getMessage());
@@ -447,7 +479,7 @@ public class Facade {
             System.err.println("Erro ao carregar os dados: " + e.getMessage());
         }
 
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("data.dat"))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("communities.dat"))) {
             communities = (Map<String, Community>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             communities = new HashMap<>();
